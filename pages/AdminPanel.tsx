@@ -13,7 +13,8 @@ interface AdminPanelProps {
 const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [successMsg, setSuccessMsg] = useState('');
-  const [newUser, setNewUser] = useState({
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
@@ -29,44 +30,74 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
     setUsers(savedUsers);
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Normalização agressiva
-    const cleanEmail = newUser.email.trim().replace(/\s+/g, '').toLowerCase();
-    const cleanPassword = newUser.password.trim();
-    const cleanName = newUser.name.trim();
+    const cleanEmail = formData.email.trim().replace(/\s+/g, '').toLowerCase();
+    const cleanPassword = formData.password.trim();
+    const cleanName = formData.name.trim();
 
     if (!cleanName || !cleanEmail || !cleanPassword) return;
 
     // LEITURA ATÔMICA: Sempre pega a lista mais atualizada do disco antes de salvar
     const currentUsersInDb: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
 
-    if (currentUsersInDb.some(u => u.email.toLowerCase() === cleanEmail)) {
-      alert(`O e-mail ${cleanEmail} já existe no sistema.`);
+    // Verificar se o e-mail já existe (ignorando o usuário que está sendo editado)
+    if (currentUsersInDb.some(u => u.email.toLowerCase() === cleanEmail && u.id !== editingId)) {
+      alert(`O e-mail ${cleanEmail} já está em uso por outro operador.`);
       return;
     }
 
-    const userObj: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: cleanName,
-      email: cleanEmail,
-      password: cleanPassword,
-      role: newUser.role,
-      isActive: true
-    };
+    let updatedUsers: User[];
 
-    const updatedUsers = [...currentUsersInDb, userObj];
+    if (editingId) {
+      // MODO EDIÇÃO
+      updatedUsers = currentUsersInDb.map(u => u.id === editingId ? {
+        ...u,
+        name: cleanName,
+        email: cleanEmail,
+        password: cleanPassword,
+        role: formData.role
+      } : u);
+      setSuccessMsg(`OPERADOR "${cleanName.toUpperCase()}" ATUALIZADO.`);
+    } else {
+      // MODO CRIAÇÃO
+      const userObj: User = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: cleanName,
+        email: cleanEmail,
+        password: cleanPassword,
+        role: formData.role,
+        isActive: true
+      };
+      updatedUsers = [...currentUsersInDb, userObj];
+      setSuccessMsg(`OPERADOR "${cleanName.toUpperCase()}" CRIADO COM SUCESSO!`);
+    }
     
-    // Escrita imediata
+    // Escrita imediata e reset de estado
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
-    
-    // Atualiza estado visual e notifica
     setUsers(updatedUsers);
-    setNewUser({ name: '', email: '', password: '', role: 'USER' });
-    setSuccessMsg(`OPERADOR "${cleanName.toUpperCase()}" CRIADO COM SUCESSO!`);
+    cancelEdit();
     
     setTimeout(() => setSuccessMsg(''), 4000);
+  };
+
+  const startEdit = (targetUser: User) => {
+    setEditingId(targetUser.id);
+    setFormData({
+      name: targetUser.name,
+      email: targetUser.email,
+      password: targetUser.password || '',
+      role: targetUser.role
+    });
+    // Scroll suave para o topo do formulário em mobile
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData({ name: '', email: '', password: '', role: 'USER' });
   };
 
   const toggleUserStatus = (id: string) => {
@@ -86,6 +117,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
       const updated = currentUsers.filter(u => u.id !== id);
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
       setUsers(updated);
+      if (editingId === id) cancelEdit();
     }
   };
 
@@ -119,13 +151,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
           
           <div className="xl:col-span-4">
             <div className="sticky top-36">
-              <Card title="Criar Operador">
-                <form onSubmit={handleCreateUser} className="space-y-6">
+              <Card title={editingId ? "Editar Operador" : "Provisionar Acesso"}>
+                <form onSubmit={handleSaveUser} className="space-y-6">
                   <Input 
                     label="Nome Completo" 
                     placeholder="Nome do Operador" 
-                    value={newUser.name} 
-                    onChange={e => setNewUser({...newUser, name: e.target.value})} 
+                    value={formData.name} 
+                    onChange={e => setFormData({...formData, name: e.target.value})} 
                     required 
                   />
                   <Input 
@@ -133,34 +165,41 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                     type="email" 
                     autoCapitalize="none"
                     placeholder="jowjow@gmail.com" 
-                    value={newUser.email} 
-                    onChange={e => setNewUser({...newUser, email: e.target.value})} 
+                    value={formData.email} 
+                    onChange={e => setFormData({...formData, email: e.target.value})} 
                     required 
                   />
                   <Input 
-                    label="Senha Provisória" 
+                    label={editingId ? "Nova Senha" : "Senha Provisória"} 
                     type="password" 
                     placeholder="••••••••" 
-                    value={newUser.password} 
-                    onChange={e => setNewUser({...newUser, password: e.target.value})} 
+                    value={formData.password} 
+                    onChange={e => setFormData({...formData, password: e.target.value})} 
                     required 
                   />
                   <Select 
-                    label="Nível" 
+                    label="Nível de Acesso" 
                     options={['USER', 'ADMIN']} 
-                    value={newUser.role} 
-                    onChange={e => setNewUser({...newUser, role: e.target.value as Role})} 
+                    value={formData.role} 
+                    onChange={e => setFormData({...formData, role: e.target.value as Role})} 
                   />
 
                   {successMsg && (
-                    <div className="p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 text-[10px] font-black text-center uppercase tracking-widest animate-bounce">
+                    <div className="p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 text-[10px] font-black text-center uppercase tracking-widest animate-pulse">
                       {successMsg}
                     </div>
                   )}
 
-                  <Button type="submit" fullWidth className="h-20 bg-purple-600 hover:bg-purple-500 shadow-xl">
-                    Provisionar Acesso
-                  </Button>
+                  <div className="flex flex-col gap-3">
+                    <Button type="submit" fullWidth className="h-20 bg-purple-600 hover:bg-purple-500 shadow-xl">
+                      {editingId ? 'Salvar Alterações' : 'Criar Operador'}
+                    </Button>
+                    {editingId && (
+                      <Button variant="ghost" fullWidth onClick={cancelEdit} className="h-16">
+                        Cancelar Edição
+                      </Button>
+                    )}
+                  </div>
                 </form>
               </Card>
             </div>
@@ -179,7 +218,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                   </thead>
                   <tbody className="divide-y divide-purple-500/5">
                     {users.map(u => (
-                      <tr key={u.id} className="hover:bg-purple-500/5 transition-all">
+                      <tr key={u.id} className={`hover:bg-purple-500/5 transition-all ${editingId === u.id ? 'bg-purple-600/10' : ''}`}>
                         <td className="py-8 px-4">
                           <p className="font-black text-white uppercase text-sm tracking-tight">{u.name}</p>
                           <p className="text-[10px] text-purple-500/60 font-mono italic">{u.email}</p>
@@ -192,6 +231,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                         <td className="py-8 px-4 text-right">
                           <div className="flex justify-end gap-3">
                             <button 
+                              onClick={() => startEdit(u)}
+                              className="p-3 bg-purple-600/10 text-purple-400 hover:bg-purple-600 hover:text-white rounded-xl border border-purple-500/20 transition-all"
+                              title="Editar Perfil"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <button 
                               onClick={() => toggleUserStatus(u.id)}
                               className={`p-3 rounded-xl border transition-all ${u.isActive ? 'border-amber-500/30 text-amber-500 hover:bg-amber-500/20' : 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20'}`}
                               title={u.isActive ? "Suspender" : "Reativar"}
@@ -200,7 +246,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                             </button>
                             <button 
                               onClick={() => deleteUser(u.id)}
-                              className="p-3 bg-red-600/10 text-red-500 hover:bg-red-600/20 rounded-xl border border-red-500/20"
+                              className="p-3 bg-red-600/10 text-red-500 hover:bg-red-600/20 rounded-xl border border-red-500/20 transition-all"
+                              title="Remover"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
