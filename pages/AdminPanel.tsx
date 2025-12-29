@@ -32,12 +32,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Normalização agressiva antes de salvar
-    const cleanEmail = newUser.email.replace(/\s+/g, '').toLowerCase();
+    // Normalização agressiva
+    const cleanEmail = newUser.email.trim().replace(/\s+/g, '').toLowerCase();
     const cleanPassword = newUser.password.trim();
     const cleanName = newUser.name.trim();
 
     if (!cleanName || !cleanEmail || !cleanPassword) return;
+
+    // LEITURA ATÔMICA: Sempre pega a lista mais atualizada do disco antes de salvar
+    const currentUsersInDb: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+
+    if (currentUsersInDb.some(u => u.email.toLowerCase() === cleanEmail)) {
+      alert(`O e-mail ${cleanEmail} já existe no sistema.`);
+      return;
+    }
 
     const userObj: User = {
       id: Math.random().toString(36).substr(2, 9),
@@ -48,42 +56,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
       isActive: true
     };
 
-    // Verifica duplicidade para evitar erros
-    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
-      alert("ERRO: Este e-mail já está cadastrado no sistema.");
-      return;
-    }
-
-    const updatedUsers = [...users, userObj];
-    saveUsers(updatedUsers);
+    const updatedUsers = [...currentUsersInDb, userObj];
     
-    // Reset e Feedback
+    // Escrita imediata
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+    
+    // Atualiza estado visual e notifica
+    setUsers(updatedUsers);
     setNewUser({ name: '', email: '', password: '', role: 'USER' });
-    setSuccessMsg(`OPERADOR "${cleanName.toUpperCase()}" CADASTRADO!`);
-    setTimeout(() => setSuccessMsg(''), 5000);
+    setSuccessMsg(`OPERADOR "${cleanName.toUpperCase()}" CRIADO COM SUCESSO!`);
+    
+    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   const toggleUserStatus = (id: string) => {
-    const updated = users.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u);
-    saveUsers(updated);
+    const currentUsers: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    const updated = currentUsers.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u);
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+    setUsers(updated);
   };
 
   const deleteUser = (id: string) => {
     if (id === user.id || id === 'master-root') {
-      alert("Ação Bloqueada: Não é possível remover o administrador principal.");
+      alert("Operação proibida: Administrador Mestre não pode ser removido.");
       return;
     }
-    if (confirm("Confirmar a REVOGAÇÃO PERMANENTE deste acesso?")) {
-      const updated = users.filter(u => u.id !== id);
-      saveUsers(updated);
+    if (confirm("Revogar este acesso permanentemente?")) {
+      const currentUsers: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const updated = currentUsers.filter(u => u.id !== id);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+      setUsers(updated);
     }
-  };
-
-  const saveUsers = (updatedUsers: User[]) => {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
-    setUsers(updatedUsers);
-    // Dispara evento para sincronizar abas se necessário
-    window.dispatchEvent(new Event('storage'));
   };
 
   return (
@@ -100,7 +103,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
             </div>
             <div>
               <h1 className="font-black text-xl tracking-tighter text-white uppercase italic">NEXO CONSOLE</h1>
-              <p className="text-[8px] text-purple-500 font-black uppercase tracking-[0.4em]">Controle de Acessos</p>
+              <p className="text-[8px] text-purple-500 font-black uppercase tracking-[0.4em]">Gestão de Identidade</p>
             </div>
           </div>
           
@@ -120,7 +123,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                 <form onSubmit={handleCreateUser} className="space-y-6">
                   <Input 
                     label="Nome Completo" 
-                    placeholder="Ex: Jonathan Jow" 
+                    placeholder="Nome do Operador" 
                     value={newUser.name} 
                     onChange={e => setNewUser({...newUser, name: e.target.value})} 
                     required 
@@ -143,14 +146,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                     required 
                   />
                   <Select 
-                    label="Nível de Privilégio" 
+                    label="Nível" 
                     options={['USER', 'ADMIN']} 
                     value={newUser.role} 
                     onChange={e => setNewUser({...newUser, role: e.target.value as Role})} 
                   />
 
                   {successMsg && (
-                    <div className="p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 text-[10px] font-black text-center uppercase tracking-widest animate-in slide-in-from-top-4 duration-300">
+                    <div className="p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400 text-[10px] font-black text-center uppercase tracking-widest animate-bounce">
                       {successMsg}
                     </div>
                   )}
@@ -164,14 +167,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
           </div>
 
           <div className="xl:col-span-8">
-            <Card title={`Base de Operadores (${users.length})`}>
+            <Card title={`Base de Operadores Ativos`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-purple-500/10">
                       <th className="py-6 px-4 text-[10px] font-black text-purple-500 uppercase tracking-widest">Usuário</th>
                       <th className="py-6 px-4 text-[10px] font-black text-purple-500 uppercase tracking-widest text-center">Nível</th>
-                      <th className="py-6 px-4 text-[10px] font-black text-purple-500 uppercase tracking-widest text-right">Controle</th>
+                      <th className="py-6 px-4 text-[10px] font-black text-purple-500 uppercase tracking-widest text-right">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-purple-500/5">
@@ -179,10 +182,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                       <tr key={u.id} className="hover:bg-purple-500/5 transition-all">
                         <td className="py-8 px-4">
                           <p className="font-black text-white uppercase text-sm tracking-tight">{u.name}</p>
-                          <p className="text-[10px] text-purple-500/60 font-mono">{u.email}</p>
+                          <p className="text-[10px] text-purple-500/60 font-mono italic">{u.email}</p>
                         </td>
                         <td className="py-8 px-4 text-center">
-                          <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase ${u.role === 'ADMIN' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                          <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase ${u.role === 'ADMIN' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/10'}`}>
                             {u.role}
                           </span>
                         </td>
@@ -191,7 +194,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                             <button 
                               onClick={() => toggleUserStatus(u.id)}
                               className={`p-3 rounded-xl border transition-all ${u.isActive ? 'border-amber-500/30 text-amber-500 hover:bg-amber-500/20' : 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20'}`}
-                              title={u.isActive ? "Suspender" : "Ativar"}
+                              title={u.isActive ? "Suspender" : "Reativar"}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
                             </button>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types.ts';
 import { STORAGE_KEYS } from '../constants.tsx';
 import { Button, Input } from '../components/UI.tsx';
@@ -13,47 +13,53 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showAdminInfo, setShowAdminInfo] = useState(false);
+  const [dbStatus, setDbStatus] = useState(0);
+
+  // Monitora a saúde do banco toda vez que abrir a info de admin
+  useEffect(() => {
+    if (showAdminInfo) {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      setDbStatus(users.length);
+    }
+  }, [showAdminInfo]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Limpeza profunda de inputs (essencial para mobile/iOS)
-    const cleanEmail = email.replace(/\s+/g, '').toLowerCase();
+    // Limpeza total de ruídos de entrada (espaços, tabs, quebras de linha)
+    const cleanEmail = email.trim().replace(/\s+/g, '').toLowerCase();
     const cleanPassword = password.trim();
 
     if (!cleanEmail || !cleanPassword) {
-      setError('PREENCHA TODOS OS CAMPOS DE SEGURANÇA.');
+      setError('SISTEMA: PREENCHA AS CHAVES DE ACESSO.');
       return;
     }
 
-    // Busca a base de usuários atualizada
+    // LEITURA ATÔMICA: Puxa do localStorage no momento do clique
     const usersRaw = localStorage.getItem(STORAGE_KEYS.USERS);
     const users: User[] = JSON.parse(usersRaw || '[]');
     
-    // Log de segurança interno (apenas para debug se necessário)
-    console.debug(`Tentativa de acesso: ${cleanEmail}`);
-
-    // Busca com normalização dupla
-    const user = users.find(u => {
-      const dbEmail = (u.email || '').replace(/\s+/g, '').toLowerCase();
-      return dbEmail === cleanEmail && u.password === cleanPassword;
+    // Busca com normalização profunda
+    const authenticatedUser = users.find(u => {
+      const storedEmail = (u.email || '').trim().replace(/\s+/g, '').toLowerCase();
+      const storedPass = (u.password || '').trim();
+      return storedEmail === cleanEmail && storedPass === cleanPassword;
     });
 
-    if (user) {
-      if (!user.isActive) {
-        setError('ACESSO NEGADO: OPERADOR SUSPENSO PELA ADMINISTRAÇÃO.');
+    if (authenticatedUser) {
+      if (!authenticatedUser.isActive) {
+        setError('ACESSO NEGADO: ESTA CONTA FOI DESATIVADA.');
         return;
       }
-      onLogin(user);
+      onLogin(authenticatedUser);
     } else {
-      setError('CREDENCIAIS INVÁLIDAS: OPERADOR NÃO LOCALIZADO.');
+      setError('ACESSO INVÁLIDO: OPERADOR NÃO RECONHECIDO.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-0 md:p-10 lg:p-20">
-      {/* Background Cinematográfico */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=2500" 
@@ -65,7 +71,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
       <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10">
         
-        {/* Lado Esquerdo: Branding */}
         <div className="hidden md:flex flex-1 relative border-r border-purple-500/10">
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-transparent"></div>
           <div className="relative z-20 p-20 lg:p-28 flex flex-col justify-between h-full">
@@ -83,7 +88,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               </h2>
               <div className="w-32 h-2 bg-purple-600 rounded-full"></div>
               <p className="text-purple-200 text-2xl max-w-lg font-medium leading-relaxed opacity-80">
-                O acesso a esta plataforma é estritamente controlado. Apenas administradores podem autorizar novos perfis.
+                Acesso restrito. Apenas administradores podem autorizar novos perfis de operador.
               </p>
             </div>
 
@@ -95,7 +100,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Lado Direito: Painel de Login */}
         <div className="flex-1 p-10 md:p-20 lg:p-32 flex flex-col justify-center bg-black/40 relative">
           <div className="flex md:hidden items-center gap-4 mb-16 justify-center">
             <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center">
@@ -106,15 +110,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <div className="mb-14 lg:mb-20 text-center md:text-left">
             <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Login</h3>
-            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Identificação de Operador</p>
+            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Chave de Operador</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-10 md:space-y-14">
+          <form onSubmit={handleLogin} className="space-y-10">
             <Input 
               label="E-mail Corporativo"
               type="email"
               autoCapitalize="none"
-              placeholder="ex: admin@nexo.com"
+              autoCorrect="off"
+              placeholder="ex: jowjow@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -122,6 +127,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <Input 
               label="Senha de Segurança"
               type="password"
+              autoCapitalize="none"
+              autoCorrect="off"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -156,9 +163,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </div>
 
             {showAdminInfo && (
-              <div className="mt-6 p-6 bg-purple-950/20 border border-purple-500/10 rounded-2xl">
-                <p className="text-[10px] text-purple-400 mb-2 font-black">MASTER ADMIN:</p>
-                <code className="text-[10px] text-white block">Email: admin@nexo.com | Pass: admin</code>
+              <div className="mt-6 p-6 bg-purple-950/20 border border-purple-500/10 rounded-2xl animate-in fade-in duration-500">
+                <p className="text-[10px] text-purple-400 mb-2 font-black uppercase">Diagnóstico do Sistema:</p>
+                <div className="space-y-1 font-mono text-[10px] text-white/70">
+                  <p>Operadores Ativos: <span className="text-purple-400 font-bold">{dbStatus}</span></p>
+                  <p>Mestre: admin@nexo.com | admin</p>
+                </div>
               </div>
             )}
           </div>
