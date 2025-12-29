@@ -6,7 +6,7 @@ import { Card, Button, Input, Select } from '../components/UI.tsx';
 import { getFinancialAnalysis } from '../services/geminiService.ts';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  Cell, PieChart, Pie, AreaChart, Area 
+  Cell, PieChart, Pie 
 } from 'recharts';
 
 interface DashboardProps {
@@ -178,7 +178,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
 
   return (
     <div className="min-h-screen relative text-gray-100 pb-32 selection:bg-purple-500/40 font-['Inter'] overflow-x-hidden">
-      {/* Cinematic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=2500" alt="Background" className="w-full h-full object-cover opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#07020a] via-[#0f0714] to-[#07020a]"></div>
@@ -202,7 +201,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           </div>
           
           <div className="flex items-center gap-2 md:gap-8">
-            {/* ADMIN ACCESS BUTTON - AGORA VISÍVEL EM TODOS OS DISPOSITIVOS */}
             {user.role === 'ADMIN' && (
               <button 
                 onClick={onGoToAdmin}
@@ -228,15 +226,45 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
             </h2>
             <div className="flex items-center gap-4">
                <div className="w-12 h-1 bg-purple-600 rounded-full"></div>
-               <p className="text-purple-400 font-bold uppercase text-[10px] md:text-xs tracking-[0.5em]">Global Control • 2026</p>
+               <p className="text-purple-400 font-bold uppercase text-[10px] md:text-xs tracking-[0.5em]">Capital Intelligence • 2026</p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full md:w-auto">
             <Button onClick={() => setShowTxForm(true)} className="h-20 text-lg">Novo Lançamento</Button>
-            <Button variant="secondary" onClick={runAnalysis} disabled={isAnalyzing} className="h-20 text-lg">{isAnalyzing ? 'Analisando...' : 'Analise IA'}</Button>
-            <Button variant="ghost" onClick={() => setShowBankForm(true)} className="h-20 text-lg">Nova Instituição</Button>
+            <Button variant="secondary" onClick={runAnalysis} disabled={isAnalyzing} className="h-20 text-lg">{isAnalyzing ? 'Processando Estratégia...' : 'Insights Nexo AI'}</Button>
+            <Button variant="ghost" onClick={() => setShowBankForm(true)} className="h-20 text-lg">Vincular Banco</Button>
           </div>
         </div>
+
+        {/* Bloco de Análise AI (Se houver análise) */}
+        {aiAnalysis && (
+          <div className="mb-16 md:mb-24 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <Card title="Nexo AI Strategy" icon={<div className="flex gap-1"><span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></span><span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce delay-100"></span><span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce delay-200"></span></div>}>
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-center">
+                <div className="xl:col-span-7 space-y-8">
+                  <p className="text-2xl md:text-3xl font-medium leading-relaxed text-purple-100 italic">
+                    "{aiAnalysis.summary}"
+                  </p>
+                  <div className="flex items-center gap-6">
+                    <div className={`px-6 py-4 rounded-[1.5rem] flex items-center gap-3 border ${aiAnalysis.percentageChange > 0 ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                      <span className="text-xl font-black">{aiAnalysis.percentageChange > 0 ? '↑' : '↓'}</span>
+                      <span className="text-sm font-black uppercase tracking-widest">{Math.abs(aiAnalysis.percentageChange)}% variação mensal</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="xl:col-span-5 space-y-4">
+                  <p className="text-[10px] font-black text-purple-500 uppercase tracking-[0.4em] mb-4">Plano de Ação Sugerido</p>
+                  {aiAnalysis.alerts.map((alert, idx) => (
+                    <div key={idx} className="p-6 rounded-[2rem] bg-white/5 border border-white/5 hover:border-purple-500/20 transition-all flex gap-5 items-start group">
+                      <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-black text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all">0{idx + 1}</div>
+                      <p className="text-sm text-purple-200 font-semibold leading-relaxed">{alert}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-10 md:gap-14 mb-16 md:mb-24">
           <div className="xl:col-span-3">
@@ -255,11 +283,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
 
               <div className="mt-16 flex flex-col md:flex-row gap-6 md:gap-10 relative z-10">
                 <div className="p-8 bg-white/5 rounded-[2.5rem] backdrop-blur-3xl flex-1 border border-white/5">
-                  <p className="text-[10px] md:text-[12px] font-black text-emerald-400 uppercase tracking-widest mb-3">Entradas</p>
+                  <p className="text-[10px] md:text-[12px] font-black text-emerald-400 uppercase tracking-widest mb-3">Fluxo de Entrada</p>
                   <p className="text-3xl md:text-4xl font-black">R$ {stats.incomes.toLocaleString('pt-BR')}</p>
                 </div>
                 <div className="p-8 bg-white/5 rounded-[2.5rem] backdrop-blur-3xl flex-1 border border-white/5">
-                  <p className="text-[10px] md:text-[12px] font-black text-red-400 uppercase tracking-widest mb-3">Saídas</p>
+                  <p className="text-[10px] md:text-[12px] font-black text-red-400 uppercase tracking-widest mb-3">Fluxo de Saída</p>
                   <p className="text-3xl md:text-4xl font-black">R$ {stats.expenses.toLocaleString('pt-BR')}</p>
                 </div>
               </div>
@@ -267,7 +295,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           </div>
 
           <div className="xl:col-span-2">
-            <Card title="Minhas Contas" className="h-full">
+            <Card title="Instituições" className="h-full">
               <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scroll">
                 {accounts.length === 0 ? (
                   <div className="py-20 text-center opacity-30 italic">Nenhuma instituição vinculada.</div>
@@ -290,7 +318,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 mb-16 md:mb-24">
-          <Card title="Distribuição de Gastos">
+          <Card title="Distribuição Analítica">
             <div className="h-[350px] w-full">
               {categoryData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -321,7 +349,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
             </div>
           </Card>
 
-          <Card title="Fluxo por Categoria">
+          <Card title="Volume por Categoria">
             <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryData}>
@@ -402,7 +430,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
                 </div>
 
                 <Select 
-                  label="Conta Origem/Destino" 
+                  label="Instituição Associada" 
                   options={["Selecione...", ...accounts.map(a => a.bankName)]} 
                   value={accounts.find(a => a.id === newTx.bankId)?.bankName || "Selecione..."}
                   onChange={e => {
@@ -413,16 +441,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <Input label="Valor" type="number" step="0.01" value={newTx.amount} onChange={e => setNewTx({...newTx, amount: e.target.value})} required />
-                  <Select label="Categoria" options={newTx.type === TransactionType.EXPENSE ? CATEGORIES.EXPENSE : CATEGORIES.INCOME} value={newTx.category} onChange={e => setNewTx({...newTx, category: e.target.value})} />
+                  <Input label="Valor da Operação" type="number" step="0.01" value={newTx.amount} onChange={e => setNewTx({...newTx, amount: e.target.value})} required />
+                  <Select label="Categoria de Controle" options={newTx.type === TransactionType.EXPENSE ? CATEGORIES.EXPENSE : CATEGORIES.INCOME} value={newTx.category} onChange={e => setNewTx({...newTx, category: e.target.value})} />
                 </div>
 
-                <Input label="Data da Operação" type="date" value={newTx.date} onChange={e => setNewTx({...newTx, date: e.target.value})} required />
-                <Input label="Identificação (Descrição)" placeholder="Ex: Investimento X..." value={newTx.description} onChange={e => setNewTx({...newTx, description: e.target.value})} />
+                <Input label="Data Efetiva" type="date" value={newTx.date} onChange={e => setNewTx({...newTx, date: e.target.value})} required />
+                <Input label="Memo / Descrição" placeholder="Ex: Pagamento Fornecedor..." value={newTx.description} onChange={e => setNewTx({...newTx, description: e.target.value})} />
 
                 <div className="flex gap-4 pt-6">
                   <Button variant="ghost" fullWidth onClick={closeTxForm}>Descartar</Button>
-                  <Button fullWidth type="submit">{editingTx ? 'Atualizar Dados' : 'Efetivar Registro'}</Button>
+                  <Button fullWidth type="submit">{editingTx ? 'Salvar Alterações' : 'Confirmar Lançamento'}</Button>
                 </div>
               </form>
             </Card>
@@ -435,12 +463,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           <div className="w-full max-w-md animate-in zoom-in-95 duration-300">
             <Card title="Nova Instituição">
               <form onSubmit={handleAddBank} className="space-y-8">
-                <Input label="Nome da Instituição" placeholder="Ex: Banco do Brasil, Binance..." value={newBank.bankName} onChange={e => setNewBank({...newBank, bankName: e.target.value})} required />
-                <Input label="Saldo Inicial (R$)" type="number" step="0.01" value={newBank.balance} onChange={e => setNewBank({...newBank, balance: e.target.value})} required />
+                <Input label="Nome da Instituição" placeholder="Ex: Santander, NuBank, XP..." value={newBank.bankName} onChange={e => setNewBank({...newBank, bankName: e.target.value})} required />
+                <Input label="Saldo Consolidado (R$)" type="number" step="0.01" value={newBank.balance} onChange={e => setNewBank({...newBank, balance: e.target.value})} required />
                 
                 <div className="flex gap-4 pt-6">
                   <Button variant="ghost" fullWidth onClick={() => setShowBankForm(false)}>Cancelar</Button>
-                  <Button fullWidth type="submit">Vincular Conta</Button>
+                  <Button fullWidth type="submit">Vincular Ativo</Button>
                 </div>
               </form>
             </Card>
