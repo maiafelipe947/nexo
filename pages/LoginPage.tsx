@@ -14,28 +14,35 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [showAdminInfo, setShowAdminInfo] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Tratamento de segurança: remove espaços e padroniza email para minúsculo
+    // Tratamento rigoroso: remove espaços acidentais e padroniza para minúsculo
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
+    if (!cleanEmail || !cleanPassword) {
+      setError('POR FAVOR, PREENCHA TODOS OS CAMPOS.');
+      return;
+    }
+
     const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    
+    // Busca o usuário ignorando espaços e case sensitivity no email
     const user = users.find(u => 
-      u.email.toLowerCase() === cleanEmail && 
+      u.email.trim().toLowerCase() === cleanEmail && 
       u.password === cleanPassword
     );
 
     if (user) {
       if (!user.isActive) {
-        setError('ACESSO BLOQUEADO: Conta desativada pelo administrador.');
+        setError('ACESSO NEGADO: ESTE OPERADOR ESTÁ SUSPENSO.');
         return;
       }
       onLogin(user);
     } else {
-      setError('CREDENCIAIS INVÁLIDAS: Falha na autenticação de segurança.');
+      setError('ACESSO INVÁLIDO: CREDENCIAIS NÃO RECONHECIDAS NO SISTEMA.');
     }
   };
 
@@ -51,7 +58,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#07020a] via-[#0f0714]/90 to-[#07020a]"></div>
       </div>
 
-      <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10 transition-all duration-700">
+      <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10">
         
         {/* Left Side: Brand Experience */}
         <div className="hidden md:flex flex-1 relative border-r border-purple-500/10">
@@ -66,12 +73,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
             <div className="space-y-10">
               <h2 className="text-7xl lg:text-8xl font-black leading-none text-white uppercase tracking-tighter italic">
-                O ápice da <br/> 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-100">Gestão</span>
+                Acesso <br/> 
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-100">Restrito</span>
               </h2>
               <div className="w-32 h-2 bg-purple-600 rounded-full"></div>
               <p className="text-purple-200 text-2xl max-w-lg font-medium leading-relaxed opacity-80">
-                Plataforma de inteligência financeira privada. <br /> Alta performance, controle absoluto.
+                Sistema de gestão financeira privada. <br />
+                Acesso exclusivo para operadores autorizados pela administração.
               </p>
             </div>
 
@@ -93,15 +101,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
 
           <div className="mb-14 lg:mb-20 text-center md:text-left">
-            <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Acesso</h3>
-            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Identifique-se para continuar</p>
+            <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Autenticação</h3>
+            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Insira suas chaves de acesso</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-10 md:space-y-14">
+          <form onSubmit={handleLogin} className="space-y-10 md:space-y-14">
             <Input 
               label="E-mail Corporativo"
               type="email"
-              placeholder="ex: master@nexo.com"
+              placeholder="ex: admin@nexo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -139,13 +147,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 className="flex items-center gap-2 text-[10px] font-black text-purple-500 hover:text-white transition-all uppercase tracking-[0.3em] border-b border-purple-500/20 pb-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Chave de Fábrica
+                Chave Mestre
               </button>
             </div>
 
             {showAdminInfo && (
               <div className="p-8 bg-purple-950/40 border-2 border-purple-500/20 rounded-[2rem] animate-in zoom-in-95 duration-300">
-                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Root Access Credentials:</p>
+                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Initial Admin Credentials:</p>
                 <div className="space-y-2 font-mono text-[11px] text-white/90">
                   <p className="flex justify-between"><span className="text-purple-500">EMAIL:</span> admin@nexo.com</p>
                   <p className="flex justify-between"><span className="text-purple-500">PASS:</span> admin</p>
