@@ -33,69 +33,72 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 md:p-8">
-      {/* Imagem de Fundo Premium - NYC */}
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-0 md:p-10 lg:p-20">
+      {/* Cinematic Background */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=2000" 
+          src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=2500" 
           alt="New York City" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0f0714]/95 via-purple-950/80 to-[#0f0714]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#07020a] via-[#0f0714]/90 to-[#07020a]"></div>
       </div>
 
-      <div className="w-full max-w-5xl flex flex-col md:flex-row bg-purple-950/20 backdrop-blur-3xl border border-purple-500/30 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.9)] relative z-10">
+      {/* Main Container: Split Screen on Desktop, Full on Mobile */}
+      <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10 transition-all duration-700">
         
-        {/* Painel Esquerdo: Branding (Desktop Only) */}
-        <div className="hidden md:flex flex-1 relative border-r border-purple-500/20">
-          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-transparent"></div>
+        {/* Left Side: Brand Experience (Desktop Only) */}
+        <div className="hidden md:flex flex-1 relative border-r border-purple-500/10">
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent"></div>
           
-          <div className="relative z-20 p-12 lg:p-20 flex flex-col justify-between h-full">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 lg:w-14 lg:h-14 bg-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(147,51,234,0.5)]">
-                <span className="text-white font-black text-2xl lg:text-3xl italic">N</span>
+          <div className="relative z-20 p-20 lg:p-28 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-purple-600 rounded-[1.5rem] flex items-center justify-center shadow-[0_0_50px_rgba(147,51,234,0.6)]">
+                <span className="text-white font-black text-4xl italic">N</span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-black tracking-tighter text-white uppercase italic">NEXO</h1>
+              <h1 className="text-6xl font-black tracking-tighter text-white uppercase italic">NEXO</h1>
             </div>
 
-            <div className="space-y-6 lg:space-y-8">
-              <h2 className="text-5xl lg:text-6xl font-black leading-none text-white uppercase tracking-tighter italic">
+            <div className="space-y-10">
+              <h2 className="text-7xl lg:text-8xl font-black leading-none text-white uppercase tracking-tighter italic">
                 O ápice da <br/> 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-100">Gestão</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-100">Gestão</span>
               </h2>
-              <p className="text-purple-200 text-lg lg:text-xl max-w-md font-medium leading-relaxed">
-                Plataforma de inteligência financeira privada. <br className="hidden lg:block" /> Simples, visual e inteligente.
+              <div className="w-32 h-2 bg-purple-600 rounded-full"></div>
+              <p className="text-purple-200 text-2xl max-w-lg font-medium leading-relaxed opacity-80">
+                Plataforma de inteligência financeira privada. <br /> Alta performance, controle absoluto.
               </p>
             </div>
 
-            <div className="flex items-center gap-6 text-[9px] font-black text-purple-400 uppercase tracking-[0.5em]">
+            <div className="flex items-center gap-8 text-[11px] font-black text-purple-500 uppercase tracking-[0.6em]">
               <span>NYC Hub</span>
-              <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-              <span>Enterprise 2026</span>
+              <span className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-[0_0_15px_#a855f7]"></span>
+              <span>EST. 2026</span>
             </div>
           </div>
         </div>
 
-        {/* Painel Direito: Login */}
-        <div className="flex-1 p-8 md:p-16 lg:p-24 flex flex-col justify-center bg-black/40">
-          {/* Logo Mobile */}
-          <div className="flex md:hidden items-center gap-3 mb-10">
-            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-black text-xl italic">N</span>
+        {/* Right Side: Identity/Login Panel */}
+        <div className="flex-1 p-10 md:p-20 lg:p-32 flex flex-col justify-center bg-black/60 relative">
+          
+          {/* Mobile Header Appearance */}
+          <div className="flex md:hidden items-center gap-4 mb-16 justify-center">
+            <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center">
+              <span className="text-white font-black text-2xl italic">N</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">NEXO</h1>
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">NEXO</h1>
           </div>
 
-          <div className="mb-10 md:mb-14 text-center md:text-left">
-            <h3 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tighter uppercase italic">Identificação</h3>
-            <p className="text-purple-400 font-bold uppercase text-[10px] md:text-xs tracking-[0.3em]">Acesse sua conta privada</p>
+          <div className="mb-14 lg:mb-20 text-center md:text-left">
+            <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Acesso</h3>
+            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Identifique-se para continuar</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-10">
+          <form onSubmit={handleSubmit} className="space-y-10 md:space-y-14">
             <Input 
-              label="E-mail de Acesso"
+              label="E-mail Corporativo"
               type="email"
-              placeholder="ex: voce@nexo.com"
+              placeholder="ex: ceo@nexo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -110,7 +113,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             />
 
             {error && (
-              <div className="p-4 md:p-5 bg-red-600/20 border-2 border-red-500/40 rounded-2xl text-red-100 text-[10px] md:text-sm font-black text-center uppercase tracking-widest animate-pulse">
+              <div className="p-6 bg-red-600/10 border border-red-500/30 rounded-3xl text-red-400 text-xs font-black text-center uppercase tracking-widest animate-pulse">
                 {error}
               </div>
             )}
@@ -118,30 +121,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <Button 
               type="submit" 
               fullWidth 
-              className="h-16 md:h-20 text-lg md:text-xl font-black bg-purple-600 hover:bg-purple-500 text-white"
+              className="h-24 md:h-28 text-2xl md:text-3xl font-black bg-purple-600 hover:bg-purple-500 text-white"
             >
-              Entrar na Plataforma
+              Entrar Agora
             </Button>
           </form>
 
-          <div className="mt-12 md:mt-16 pt-8 md:pt-10 border-t border-purple-500/20 flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-[9px] text-purple-700 font-black uppercase tracking-[0.3em]">Nexo Systems © 2026</p>
+          <div className="mt-20 md:mt-28 pt-12 border-t border-purple-500/10 flex flex-col gap-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+              <p className="text-[10px] text-purple-800 font-black uppercase tracking-[0.4em]">Nexo Systems © 2026</p>
               <button 
                 type="button"
                 onClick={() => setShowAdminInfo(!showAdminInfo)}
-                className="text-[9px] font-black text-purple-500 hover:text-white transition-colors uppercase tracking-[0.2em] border-b border-purple-500/30"
+                className="text-[10px] font-black text-purple-500 hover:text-white transition-all uppercase tracking-[0.3em] border-b border-purple-500/20 pb-1"
               >
-                Acesso Homologação
+                Modo Homologação
               </button>
             </div>
 
             {showAdminInfo && (
-              <div className="p-5 md:p-6 bg-purple-900/30 border-2 border-purple-500/30 rounded-2xl md:rounded-3xl animate-in slide-in-from-bottom-4">
-                <p className="text-[8px] md:text-[9px] text-purple-300 mb-2 font-black uppercase tracking-[0.2em] underline">Credenciais:</p>
-                <div className="space-y-1 font-mono text-[10px] md:text-xs text-white">
-                  <p><span className="text-purple-400">EMAIL:</span> admin@nexo.com</p>
-                  <p><span className="text-purple-400">SENHA:</span> admin</p>
+              <div className="p-8 bg-purple-950/40 border-2 border-purple-500/20 rounded-[2rem] animate-in zoom-in-95 duration-300">
+                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Credenciais Internas:</p>
+                <div className="space-y-2 font-mono text-[11px] text-white/90">
+                  <p className="flex justify-between"><span className="text-purple-500">ID:</span> admin@nexo.com</p>
+                  <p className="flex justify-between"><span className="text-purple-500">KEY:</span> admin</p>
                 </div>
               </div>
             )}
@@ -149,8 +152,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         </div>
       </div>
       
-      <div className="absolute bottom-6 md:bottom-8 text-[8px] md:text-[11px] text-white/20 uppercase tracking-[0.6em] md:tracking-[1em] font-black z-10 text-center px-4">
-        NEXO • GLOBAL FINANCIAL CONTROL 2026
+      <div className="hidden md:block absolute bottom-12 text-[12px] text-white/10 uppercase tracking-[1.5em] font-black z-10 text-center w-full">
+        PRIVACY • SECURITY • INTELLIGENCE
       </div>
     </div>
   );
