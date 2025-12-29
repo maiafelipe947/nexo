@@ -23,12 +23,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
     if (user) {
       if (!user.isActive) {
-        setError('Esta conta foi desativada pelo administrador.');
+        setError('ACESSO BLOQUEADO: Conta desativada pelo administrador.');
         return;
       }
       onLogin(user);
     } else {
-      setError('Credenciais inválidas. Verifique os dados ou contate o ADM.');
+      setError('CREDENCIAIS INVÁLIDAS: Falha na autenticação de segurança.');
     }
   };
 
@@ -44,13 +44,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#07020a] via-[#0f0714]/90 to-[#07020a]"></div>
       </div>
 
-      {/* Main Container: Split Screen on Desktop, Full on Mobile */}
       <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10 transition-all duration-700">
         
-        {/* Left Side: Brand Experience (Desktop Only) */}
+        {/* Left Side: Brand Experience */}
         <div className="hidden md:flex flex-1 relative border-r border-purple-500/10">
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent"></div>
-          
           <div className="relative z-20 p-20 lg:p-28 flex flex-col justify-between h-full">
             <div className="flex items-center gap-6">
               <div className="w-16 h-16 bg-purple-600 rounded-[1.5rem] flex items-center justify-center shadow-[0_0_50px_rgba(147,51,234,0.6)]">
@@ -78,10 +76,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Right Side: Identity/Login Panel */}
+        {/* Right Side: Login Panel */}
         <div className="flex-1 p-10 md:p-20 lg:p-32 flex flex-col justify-center bg-black/60 relative">
-          
-          {/* Mobile Header Appearance */}
           <div className="flex md:hidden items-center gap-4 mb-16 justify-center">
             <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center">
               <span className="text-white font-black text-2xl italic">N</span>
@@ -98,13 +94,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <Input 
               label="E-mail Corporativo"
               type="email"
-              placeholder="ex: ceo@nexo.com"
+              placeholder="ex: master@nexo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input 
-              label="Senha de Acesso"
+              label="Senha de Segurança"
               type="password"
               placeholder="••••••••"
               value={password}
@@ -113,7 +109,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             />
 
             {error && (
-              <div className="p-6 bg-red-600/10 border border-red-500/30 rounded-3xl text-red-400 text-xs font-black text-center uppercase tracking-widest animate-pulse">
+              <div className="p-6 bg-red-600/10 border border-red-500/30 rounded-3xl text-red-400 text-[10px] font-black text-center uppercase tracking-[0.2em] animate-pulse">
                 {error}
               </div>
             )}
@@ -123,37 +119,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               fullWidth 
               className="h-24 md:h-28 text-2xl md:text-3xl font-black bg-purple-600 hover:bg-purple-500 text-white"
             >
-              Entrar Agora
+              Iniciar Sessão
             </Button>
           </form>
 
           <div className="mt-20 md:mt-28 pt-12 border-t border-purple-500/10 flex flex-col gap-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <p className="text-[10px] text-purple-800 font-black uppercase tracking-[0.4em]">Nexo Systems © 2026</p>
+              <p className="text-[10px] text-purple-800 font-black uppercase tracking-[0.4em]">Nexo Security Systems © 2026</p>
               <button 
                 type="button"
                 onClick={() => setShowAdminInfo(!showAdminInfo)}
-                className="text-[10px] font-black text-purple-500 hover:text-white transition-all uppercase tracking-[0.3em] border-b border-purple-500/20 pb-1"
+                className="flex items-center gap-2 text-[10px] font-black text-purple-500 hover:text-white transition-all uppercase tracking-[0.3em] border-b border-purple-500/20 pb-1"
               >
-                Modo Homologação
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Chave de Fábrica
               </button>
             </div>
 
             {showAdminInfo && (
               <div className="p-8 bg-purple-950/40 border-2 border-purple-500/20 rounded-[2rem] animate-in zoom-in-95 duration-300">
-                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Credenciais Internas:</p>
+                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Root Access Credentials:</p>
                 <div className="space-y-2 font-mono text-[11px] text-white/90">
-                  <p className="flex justify-between"><span className="text-purple-500">ID:</span> admin@nexo.com</p>
-                  <p className="flex justify-between"><span className="text-purple-500">KEY:</span> admin</p>
+                  <p className="flex justify-between"><span className="text-purple-500">EMAIL:</span> admin@nexo.com</p>
+                  <p className="flex justify-between"><span className="text-purple-500">PASS:</span> admin</p>
                 </div>
               </div>
             )}
           </div>
         </div>
-      </div>
-      
-      <div className="hidden md:block absolute bottom-12 text-[12px] text-white/10 uppercase tracking-[1.5em] font-black z-10 text-center w-full">
-        PRIVACY • SECURITY • INTELLIGENCE
       </div>
     </div>
   );

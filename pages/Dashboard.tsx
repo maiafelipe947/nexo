@@ -56,7 +56,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
     return { incomes, expenses };
   }, [transactions]);
 
-  // Dados para os Gráficos
   const categoryData = useMemo(() => {
     const data: Record<string, number> = {};
     transactions.filter(t => t.type === TransactionType.EXPENSE).forEach(t => {
@@ -87,11 +86,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
     const adjustments: { bankId: string, amount: number }[] = [];
 
     if (editingTx) {
-      // Reverter impacto antigo
       const oldImpact = editingTx.type === TransactionType.EXPENSE ? editingTx.amount : -editingTx.amount;
       adjustments.push({ bankId: editingTx.bankId!, amount: oldImpact });
-
-      // Aplicar impacto novo
       const newImpact = newTx.type === TransactionType.EXPENSE ? -amount : amount;
       const existingAdj = adjustments.find(a => a.bankId === newTx.bankId);
       if (existingAdj) existingAdj.amount += newImpact;
@@ -189,35 +185,42 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
       </div>
 
       <nav className="border-b border-purple-500/10 bg-purple-950/40 backdrop-blur-3xl sticky top-0 z-[60]">
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-12 h-24 md:h-28 flex items-center justify-between">
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-12 h-24 md:h-28 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg relative">
               <span className="text-white font-black text-xl md:text-2xl italic">N</span>
+              {user.role === 'ADMIN' && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0f0714] shadow-[0_0_10px_#10b981]"></div>
+              )}
             </div>
-            <h1 className="font-black text-2xl md:text-3xl tracking-tighter text-white uppercase italic">NEXO</h1>
+            <div>
+              <h1 className="font-black text-xl md:text-3xl tracking-tighter text-white uppercase italic">NEXO</h1>
+              {user.role === 'ADMIN' && (
+                <span className="block text-[8px] text-purple-400 font-black tracking-widest uppercase">Admin Verified</span>
+              )}
+            </div>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-8">
-            {/* ADMIN ACCESS BUTTON */}
+          <div className="flex items-center gap-2 md:gap-8">
+            {/* ADMIN ACCESS BUTTON - AGORA VISÍVEL EM TODOS OS DISPOSITIVOS */}
             {user.role === 'ADMIN' && (
               <button 
                 onClick={onGoToAdmin}
-                className="hidden sm:flex items-center gap-3 px-6 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600 hover:text-white transition-all duration-300"
+                className="flex items-center gap-2 md:gap-3 px-3 py-2 md:px-6 md:py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600 hover:text-white transition-all duration-300"
               >
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_#a855f7]"></div>
-                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest italic">Painel de Comando</span>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_#a855f7]"></div>
+                <span className="text-[8px] md:text-[11px] font-black uppercase tracking-widest italic whitespace-nowrap">Admin Console</span>
               </button>
             )}
 
             <button onClick={onLogout} className="p-3 md:p-4 rounded-2xl bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white transition-all border border-red-500/20">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </button>
           </div>
         </div>
       </nav>
 
       <main className="max-w-screen-2xl mx-auto px-6 md:px-12 pt-12 md:pt-20 relative z-10">
-        {/* Header Épico */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-16 md:mb-24">
           <div className="space-y-4">
             <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase italic leading-none">
@@ -235,9 +238,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           </div>
         </div>
 
-        {/* Cards Principais */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-10 md:gap-14 mb-16 md:mb-24">
-          {/* Card Patrimônio de Luxo */}
           <div className="xl:col-span-3">
             <div className="relative h-full p-10 md:p-16 rounded-[3rem] md:rounded-[5rem] bg-gradient-to-br from-purple-600 to-indigo-900 shadow-[0_50px_100px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden group min-h-[450px]">
               <div className="absolute top-0 right-0 p-16 opacity-5 rotate-12 transition-transform duration-1000 pointer-events-none">
@@ -265,7 +266,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
             </div>
           </div>
 
-          {/* Listagem de Contas */}
           <div className="xl:col-span-2">
             <Card title="Minhas Contas" className="h-full">
               <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scroll">
@@ -289,7 +289,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           </div>
         </div>
 
-        {/* Seção de Gráficos e Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 mb-16 md:mb-24">
           <Card title="Distribuição de Gastos">
             <div className="h-[350px] w-full">
@@ -337,7 +336,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
           </Card>
         </div>
 
-        {/* Histórico de Transações Editáveis */}
         <div className="mb-16 md:mb-24">
           <Card title="Histórico de Lançamentos">
             <div className="overflow-x-auto">
@@ -385,7 +383,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
         </div>
       </main>
 
-      {/* Modal Novo/Editar Lançamento */}
       {showTxForm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-[#07020a]/98 backdrop-blur-2xl">
           <div className="w-full max-w-2xl animate-in zoom-in-95 duration-300">
@@ -433,7 +430,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
         </div>
       )}
 
-      {/* Modal Nova Conta */}
       {showBankForm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-[#07020a]/98 backdrop-blur-2xl">
           <div className="w-full max-w-md animate-in zoom-in-95 duration-300">
