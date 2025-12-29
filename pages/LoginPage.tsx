@@ -18,54 +18,59 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
 
-    // Tratamento rigoroso: remove espaços acidentais e padroniza para minúsculo
-    const cleanEmail = email.trim().toLowerCase();
+    // Limpeza profunda de inputs (essencial para mobile/iOS)
+    const cleanEmail = email.replace(/\s+/g, '').toLowerCase();
     const cleanPassword = password.trim();
 
     if (!cleanEmail || !cleanPassword) {
-      setError('POR FAVOR, PREENCHA TODOS OS CAMPOS.');
+      setError('PREENCHA TODOS OS CAMPOS DE SEGURANÇA.');
       return;
     }
 
-    const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    // Busca a base de usuários atualizada
+    const usersRaw = localStorage.getItem(STORAGE_KEYS.USERS);
+    const users: User[] = JSON.parse(usersRaw || '[]');
     
-    // Busca o usuário ignorando espaços e case sensitivity no email
-    const user = users.find(u => 
-      u.email.trim().toLowerCase() === cleanEmail && 
-      u.password === cleanPassword
-    );
+    // Log de segurança interno (apenas para debug se necessário)
+    console.debug(`Tentativa de acesso: ${cleanEmail}`);
+
+    // Busca com normalização dupla
+    const user = users.find(u => {
+      const dbEmail = (u.email || '').replace(/\s+/g, '').toLowerCase();
+      return dbEmail === cleanEmail && u.password === cleanPassword;
+    });
 
     if (user) {
       if (!user.isActive) {
-        setError('ACESSO NEGADO: ESTE OPERADOR ESTÁ SUSPENSO.');
+        setError('ACESSO NEGADO: OPERADOR SUSPENSO PELA ADMINISTRAÇÃO.');
         return;
       }
       onLogin(user);
     } else {
-      setError('ACESSO INVÁLIDO: CREDENCIAIS NÃO RECONHECIDAS NO SISTEMA.');
+      setError('CREDENCIAIS INVÁLIDAS: OPERADOR NÃO LOCALIZADO.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-0 md:p-10 lg:p-20">
-      {/* Cinematic Background */}
+      {/* Background Cinematográfico */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=2500" 
-          alt="New York City" 
+          alt="NYC" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#07020a] via-[#0f0714]/90 to-[#07020a]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#07020a] via-[#0f0714]/95 to-[#07020a]"></div>
       </div>
 
       <div className="w-full max-w-7xl h-full md:h-auto md:min-h-[850px] flex flex-col md:flex-row bg-[#0f0714]/40 backdrop-blur-3xl border-0 md:border md:border-purple-500/20 rounded-none md:rounded-[4rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] relative z-10">
         
-        {/* Left Side: Brand Experience */}
+        {/* Lado Esquerdo: Branding */}
         <div className="hidden md:flex flex-1 relative border-r border-purple-500/10">
-          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-transparent"></div>
           <div className="relative z-20 p-20 lg:p-28 flex flex-col justify-between h-full">
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-purple-600 rounded-[1.5rem] flex items-center justify-center shadow-[0_0_50px_rgba(147,51,234,0.6)]">
+              <div className="w-16 h-16 bg-purple-600 rounded-[1.5rem] flex items-center justify-center shadow-[0_0_50px_rgba(147,51,234,0.4)]">
                 <span className="text-white font-black text-4xl italic">N</span>
               </div>
               <h1 className="text-6xl font-black tracking-tighter text-white uppercase italic">NEXO</h1>
@@ -73,26 +78,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
             <div className="space-y-10">
               <h2 className="text-7xl lg:text-8xl font-black leading-none text-white uppercase tracking-tighter italic">
-                Acesso <br/> 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-100">Restrito</span>
+                SISTEMA <br/> 
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-100">FECHADO</span>
               </h2>
               <div className="w-32 h-2 bg-purple-600 rounded-full"></div>
               <p className="text-purple-200 text-2xl max-w-lg font-medium leading-relaxed opacity-80">
-                Sistema de gestão financeira privada. <br />
-                Acesso exclusivo para operadores autorizados pela administração.
+                O acesso a esta plataforma é estritamente controlado. Apenas administradores podem autorizar novos perfis.
               </p>
             </div>
 
             <div className="flex items-center gap-8 text-[11px] font-black text-purple-500 uppercase tracking-[0.6em]">
-              <span>NYC Hub</span>
-              <span className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-[0_0_15px_#a855f7]"></span>
+              <span>TERMINAL SEGURO</span>
+              <span className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></span>
               <span>EST. 2026</span>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Login Panel */}
-        <div className="flex-1 p-10 md:p-20 lg:p-32 flex flex-col justify-center bg-black/60 relative">
+        {/* Lado Direito: Painel de Login */}
+        <div className="flex-1 p-10 md:p-20 lg:p-32 flex flex-col justify-center bg-black/40 relative">
           <div className="flex md:hidden items-center gap-4 mb-16 justify-center">
             <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center">
               <span className="text-white font-black text-2xl italic">N</span>
@@ -101,14 +105,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
 
           <div className="mb-14 lg:mb-20 text-center md:text-left">
-            <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Autenticação</h3>
-            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Insira suas chaves de acesso</p>
+            <h3 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Login</h3>
+            <p className="text-purple-400 font-bold uppercase text-xs tracking-[0.4em] opacity-80">Identificação de Operador</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-10 md:space-y-14">
             <Input 
               label="E-mail Corporativo"
               type="email"
+              autoCapitalize="none"
               placeholder="ex: admin@nexo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -132,32 +137,28 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <Button 
               type="submit" 
               fullWidth 
-              className="h-24 md:h-28 text-2xl md:text-3xl font-black bg-purple-600 hover:bg-purple-500 text-white"
+              className="h-24 md:h-28 text-2xl md:text-3xl font-black"
             >
-              Iniciar Sessão
+              Autenticar
             </Button>
           </form>
 
-          <div className="mt-20 md:mt-28 pt-12 border-t border-purple-500/10 flex flex-col gap-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <p className="text-[10px] text-purple-800 font-black uppercase tracking-[0.4em]">Nexo Security Systems © 2026</p>
+          <div className="mt-20 md:mt-28 pt-12 border-t border-purple-500/10">
+            <div className="flex items-center justify-between">
+              <p className="text-[9px] text-purple-800 font-black uppercase tracking-[0.4em]">Nexo Security Systems</p>
               <button 
                 type="button"
                 onClick={() => setShowAdminInfo(!showAdminInfo)}
-                className="flex items-center gap-2 text-[10px] font-black text-purple-500 hover:text-white transition-all uppercase tracking-[0.3em] border-b border-purple-500/20 pb-1"
+                className="text-[9px] font-black text-purple-600 hover:text-white transition-all uppercase tracking-[0.3em] underline decoration-purple-900"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Chave Mestre
+                Root Key
               </button>
             </div>
 
             {showAdminInfo && (
-              <div className="p-8 bg-purple-950/40 border-2 border-purple-500/20 rounded-[2rem] animate-in zoom-in-95 duration-300">
-                <p className="text-[10px] text-purple-300 mb-4 font-black uppercase tracking-[0.3em] underline decoration-purple-500/50">Initial Admin Credentials:</p>
-                <div className="space-y-2 font-mono text-[11px] text-white/90">
-                  <p className="flex justify-between"><span className="text-purple-500">EMAIL:</span> admin@nexo.com</p>
-                  <p className="flex justify-between"><span className="text-purple-500">PASS:</span> admin</p>
-                </div>
+              <div className="mt-6 p-6 bg-purple-950/20 border border-purple-500/10 rounded-2xl">
+                <p className="text-[10px] text-purple-400 mb-2 font-black">MASTER ADMIN:</p>
+                <code className="text-[10px] text-white block">Email: admin@nexo.com | Pass: admin</code>
               </div>
             )}
           </div>
