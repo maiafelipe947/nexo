@@ -12,6 +12,7 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [successMsg, setSuccessMsg] = useState('');
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -32,11 +33,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
     e.preventDefault();
     if (!newUser.name || !newUser.email || !newUser.password) return;
 
+    // Garante que o email seja salvo em minúsculo para facilitar a busca
     const userObj: User = {
       id: Math.random().toString(36).substr(2, 9),
       name: newUser.name,
-      email: newUser.email,
-      password: newUser.password,
+      email: newUser.email.trim().toLowerCase(),
+      password: newUser.password.trim(),
       role: newUser.role,
       isActive: true
     };
@@ -44,6 +46,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
     const updatedUsers = [...users, userObj];
     saveUsers(updatedUsers);
     setNewUser({ name: '', email: '', password: '', role: 'USER' });
+    
+    setSuccessMsg('OPERADOR REGISTRADO COM SUCESSO!');
+    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   const toggleUserStatus = (id: string) => {
@@ -131,6 +136,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, onBackToUser })
                     value={newUser.role} 
                     onChange={e => setNewUser({...newUser, role: e.target.value as Role})} 
                   />
+
+                  {successMsg && (
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 text-[10px] font-black text-center uppercase tracking-widest animate-bounce">
+                      {successMsg}
+                    </div>
+                  )}
+
                   <Button type="submit" fullWidth className="h-20 bg-purple-600 hover:bg-purple-500">
                     Provisionar Usuário
                   </Button>

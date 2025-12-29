@@ -18,8 +18,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
 
+    // Tratamento de segurança: remove espaços e padroniza email para minúsculo
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = users.find(u => 
+      u.email.toLowerCase() === cleanEmail && 
+      u.password === cleanPassword
+    );
 
     if (user) {
       if (!user.isActive) {
