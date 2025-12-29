@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Transaction, BankAccount, Role, TransactionType } from './types';
-import { STORAGE_KEYS } from './constants';
-import LoginPage from './pages/LoginPage';
-import Dashboard from './pages/Dashboard';
-import AdminPanel from './pages/AdminPanel';
+import { User } from './types.ts';
+import { STORAGE_KEYS } from './constants.tsx';
+import LoginPage from './pages/LoginPage.tsx';
+import Dashboard from './pages/Dashboard.tsx';
+import AdminPanel from './pages/AdminPanel.tsx';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -12,13 +12,11 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage for session
     const savedAuth = localStorage.getItem(STORAGE_KEYS.AUTH);
     if (savedAuth) {
       setCurrentUser(JSON.parse(savedAuth));
     }
     
-    // Seed initial admin if none exists
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     if (users.length === 0) {
       const initialAdmin: User = {
@@ -27,7 +25,7 @@ const App: React.FC = () => {
         name: 'Administrador Principal',
         role: 'ADMIN',
         isActive: true,
-        password: 'admin' // In a real app, this would be hashed
+        password: 'admin'
       };
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([initialAdmin]));
     }

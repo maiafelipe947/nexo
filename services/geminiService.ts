@@ -1,10 +1,11 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Transaction, AIAnalysis } from '../types';
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+import { Transaction, AIAnalysis } from '../types.ts';
 
 export const getFinancialAnalysis = async (transactions: Transaction[]): Promise<AIAnalysis> => {
+  // Inicialização dentro da função para garantir acesso ao process.env em tempo de execução
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   
@@ -51,7 +52,7 @@ export const getFinancialAnalysis = async (transactions: Transaction[]): Promise
       }
     });
 
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '{}');
   } catch (error) {
     console.error("AI Analysis failed:", error);
     return {
