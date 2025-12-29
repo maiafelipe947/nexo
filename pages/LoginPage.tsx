@@ -93,7 +93,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               required
             />
             <Input 
-              label="Código de Segurança"
+              label="Senha de Acesso"
               type="password"
               placeholder="••••••••"
               value={password}
