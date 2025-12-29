@@ -197,7 +197,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onGoToAdmin }) =>
             <h1 className="font-black text-2xl md:text-3xl tracking-tighter text-white uppercase italic">NEXO</h1>
           </div>
           
-          <div className="flex items-center gap-4 md:gap-8">
+          <div className="flex items-center gap-3 md:gap-8">
+            {/* ADMIN ACCESS BUTTON */}
+            {user.role === 'ADMIN' && (
+              <button 
+                onClick={onGoToAdmin}
+                className="hidden sm:flex items-center gap-3 px-6 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600 hover:text-white transition-all duration-300"
+              >
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_#a855f7]"></div>
+                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest italic">Painel de Comando</span>
+              </button>
+            )}
+
             <button onClick={onLogout} className="p-3 md:p-4 rounded-2xl bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white transition-all border border-red-500/20">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </button>
